@@ -4,6 +4,11 @@ const User = require("../users/users-model.js");
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
+  const timestamp = new Date().toLocaleString();
+  const method = req.method;
+  const url = req.oiginalURL;
+  console.log(`[${timestamp}] ${method} to ${url}`);
+  next();
 }
 
 async function validateUserId(req, res, next) {
@@ -32,7 +37,7 @@ function validateUser(req, res, next) {
       message: "missing required name field",
     });
   } else {
-    req.name = name.trim();
+    req.name = name.trim(); // saves other middlewares a db trip
     next();
   }
 }
@@ -43,7 +48,7 @@ function validatePost(req, res, next) {
   if (!text) {
     next({ status: 400, message: "missing required text field" });
   } else {
-    req.text = text.trim();
+    req.text = text.trim(); // saves other middlewares a db trip
     next();
   }
 }
