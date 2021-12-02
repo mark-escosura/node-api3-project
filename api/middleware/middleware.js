@@ -45,8 +45,11 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
   const { text } = req.body;
-  if (!text) {
-    next({ status: 400, message: "missing required text field" });
+  if (!text || !text.trim()) {
+    res.status(400).json({
+      message: "missing required text field",
+    });
+    next();
   } else {
     req.text = text.trim(); // saves other middlewares a db trip
     next();

@@ -1,9 +1,13 @@
 const express = require("express");
-const { validateUserId, validateUser } = require("../middleware/middleware");
+const {
+  validateUserId,
+  validateUser,
+  validatePost,
+} = require("../middleware/middleware");
 
 // You will need `users-model.js` and `posts-model.js` both
-const Users = require("./users-model");
-const Posts = require("../posts/posts-model");
+const Users = require("./users-model.js");
+const Posts = require("../posts/posts-model.js");
 
 const router = express.Router();
 // The middleware functions also need to be required
@@ -28,11 +32,11 @@ router.get("/:id", validateUserId, (req, res) => {
 });
 
 router.post("/", validateUser, async (req, res, next) => {
-  // eslint-disable-line
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
+  const name = { name: req.name };
   try {
-    const newUser = await Users.insert({ name: req.name });
+    const newUser = await Users.insert(name);
     res.status(201).json(newUser);
   } catch (error) {
     next(error);
@@ -83,11 +87,24 @@ router.get("/:id/posts", validateUserId, async (req, res, next) => {
   }
 });
 
-router.post("/:id/posts", (req, res) => {
-  // RETURN THE NEWLY CREATED USER POST
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
-});
+router.post(
+  "/:id/posts",
+  [validateUserId, validatePost],
+  async (req, res, next) => {
+    // RETURN THE NEWLY CREATED USER POST
+    // this needs a middleware to verify user id
+    // and another middleware to check that the request body is valid
+    try {
+      const result = await Posts.insert({
+        user_id: req.params.id,
+        text: req.text,
+      });
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // do not forget to export the router
 module.exports = router;
