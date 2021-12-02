@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", validateUserId, (req, res, next) => {
+router.get("/:id", validateUserId, (req, res) => {
   // eslint-disable-line
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
@@ -53,9 +53,16 @@ router.put("/:id", [validateUserId, validateUser], async (req, res, next) => {
   }
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateUserId, async (req, res, next) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+  const { id } = req.params;
+  try {
+    await Users.remove(id);
+    res.json(req.user);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get("/:id/posts", (req, res) => {
@@ -67,6 +74,7 @@ router.post("/:id/posts", (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  
 });
 
 // do not forget to export the router
